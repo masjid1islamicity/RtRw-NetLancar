@@ -1,0 +1,6 @@
+{
+  "name": "NetLancar - RtRwNet Smart Billing & Finance Platform",
+  "description": "Platform manajemen infrastruktur RT/RW Net cerdas dengan pemantauan bandwidth real-time, penagihan otomatis, rekap keuangan multi-dompet, notifikasi WhatsApp, gateway pembayaran, dan dukungan AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
