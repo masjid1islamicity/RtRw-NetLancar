@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#4338ca" />
+      <stop offset="100%" stop-color="#312e81" />
+    </linearGradient>
+    <linearGradient id="pulse" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)" />
+  <!-- Wave concentric wifi arcs -->
+  <circle cx="256" cy="380" r="28" fill="#10b981" />
+  <path d="M 176 310 A 110 110 0 0 1 336 310" stroke="url(#pulse)" stroke-width="26" stroke-linecap="round" fill="none" />
+  <path d="M 120 240 A 180 180 0 0 1 392 240" stroke="url(#pulse)" stroke-width="26" stroke-linecap="round" fill="none" />
+  <path d="M 64 170 A 250 250 0 0 1 448 170" stroke="#38bdf8" stroke-width="26" stroke-linecap="round" fill="none" />
+  <!-- Islamic geometric star accent at top center -->
+  <polygon points="256,70 266,95 292,95 272,110 280,135 256,120 232,135 240,110 220,95 246,95" fill="#fcd34d" />
+</svg>

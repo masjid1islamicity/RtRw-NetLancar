@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Wifi,
   Receipt,
@@ -16,6 +16,10 @@ import {
   Clock,
   Sparkles,
   QrCode,
+  Smartphone,
+  PlusCircle,
+  X,
+  ShieldCheck,
 } from "lucide-react";
 import { Customer, Invoice, InternetPackage, PaymentMethod } from "../../types";
 import { formatRupiah, generateWhatsAppLink } from "../../services/storage";
@@ -49,6 +53,48 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   const [isRestartingModem, setIsRestartingModem] = useState(false);
   const [modemRestarted, setModemRestarted] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isPwaInstalled, setIsPwaInstalled] = useState(false);
+  const [showIosGuide, setShowIosGuide] = useState(false);
+  const [isIosDevice, setIsIosDevice] = useState(false);
+  const [pwaBannerDismissed, setPwaBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    // Check if running in standalone mode (already installed)
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsPwaInstalled(true);
+    }
+
+    // Detect iOS
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIosDevice(isIos);
+
+    // Listen for beforeinstallprompt
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+  }, []);
+
+  const handleInstallPwa = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      if (choiceResult.outcome === "accepted") {
+        setIsPwaInstalled(true);
+      }
+      setDeferredPrompt(null);
+    } else if (isIosDevice) {
+      setShowIosGuide(true);
+    } else {
+      setShowIosGuide(true);
+    }
+  };
 
   const customerInvoices = invoices.filter((i) => i.customerId === customer.id);
   const activeInvoice = customerInvoices.find(
@@ -115,6 +161,47 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Progressive Web App (PWA) Install Banner */}
+      {!isPwaInstalled && !pwaBannerDismissed && (
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-blue-500/10 border border-indigo-200 dark:border-indigo-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/20 shrink-0">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Pasang Aplikasi di Layar Utama (PWA Mobile)
+                </h4>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                  Akses Cepat
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Buka tagihan &amp; scan QRIS langsung dari beranda HP tanpa buka browser. Mendukung akses offline!
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleInstallPwa}
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 cursor-pointer transition-all"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>{isIosDevice ? "Cara Pasang di iPhone" : "Pasang Aplikasi Sekarang"}</span>
+            </button>
+            <button
+              onClick={() => setPwaBannerDismissed(true)}
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600"
+              title="Tutup banner"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Isolation Warning Alert if isolated */}
       {customer.status === "isolated" && (
@@ -344,6 +431,64 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
           onOpenPaymentModal(inv);
         }}
       />
+
+      {/* iOS PWA Install Guide Modal */}
+      {showIosGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Pasang di Layar Utama iPhone
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowIosGuide(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="font-bold text-slate-900 dark:text-white block">
+                  1. Buka di Safari &amp; Ketuk Tombol "Bagikan" (Share)
+                </span>
+                <p className="text-[11px] text-slate-500">
+                  Ikon kotak dengan panah mengarah ke atas di bagian bawah layar Safari (⎋).
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="font-bold text-slate-900 dark:text-white block">
+                  2. Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)
+                </span>
+                <p className="text-[11px] text-slate-500">
+                  Gulir ke bawah pada menu opsi hingga menemukan tanda (+) Tambah ke Layar Utama.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="font-bold text-slate-900 dark:text-white block">
+                  3. Ketuk "Tambah" (Add) di Kanan Atas
+                </span>
+                <p className="text-[11px] text-slate-500">
+                  Ikon NetLancar akan muncul di layar ponsel seperti aplikasi native App Store!
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowIosGuide(false)}
+              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs"
+            >
+              Saya Mengerti &amp; Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

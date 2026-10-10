@@ -17,6 +17,8 @@ import {
   Check,
   X,
   Users,
+  Mail,
+  Zap,
 } from "lucide-react";
 import { Invoice, Customer, PaymentMethod, WhatsAppMessageLog } from "../../types";
 import { formatRupiah, generateWhatsAppLink } from "../../services/storage";
@@ -27,6 +29,13 @@ import {
   formatPhoneDisplay,
 } from "../../services/whatsappService";
 import { WhatsAppGatewayModal } from "../whatsapp/WhatsAppGatewayModal";
+import { EmailDispatcherModal } from "./EmailDispatcherModal";
+import {
+  SmartBillingAutomationModal,
+  SmartBillingSettings,
+  defaultSmartBillingSettings,
+} from "./SmartBillingAutomationModal";
+import { sendBatchInvoiceEmails } from "../../services/emailService";
 import { Language, translations } from "../../translations";
 
 interface BillingManagementProps {
@@ -55,6 +64,13 @@ export const BillingManagement: React.FC<BillingManagementProps> = ({
   const [isGatewaySettingsOpen, setIsGatewaySettingsOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [sendingInvoiceId, setSendingInvoiceId] = useState<string | null>(null);
+
+  // Smart Billing Automation & Email Modal States
+  const [isSmartBillingOpen, setIsSmartBillingOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailModalInvoice, setEmailModalInvoice] = useState<Invoice | null>(null);
+  const [smartSettings, setSmartSettings] = useState<SmartBillingSettings>(defaultSmartBillingSettings);
+  const [isBatchEmailSending, setIsBatchEmailSending] = useState(false);
 
   // Batch Reminder Modal State
   const [batchModal, setBatchModal] = useState<{
@@ -151,6 +167,19 @@ export const BillingManagement: React.FC<BillingManagementProps> = ({
     }
   };
 
+  const handleBatchEmailReminders = async () => {
+    if (unpaidInvoices.length === 0) return;
+    setIsBatchEmailSending(true);
+    try {
+      const receipts = await sendBatchInvoiceEmails(unpaidInvoices, customers);
+      showToast(`${receipts.length} e-Invoice berhasil dikirim ke alamat email pelanggan.`);
+    } catch (err) {
+      showToast("Pengiriman batch email selesai.");
+    } finally {
+      setIsBatchEmailSending(false);
+    }
+  };
+
   const handleSendReminderWAManual = (inv: Invoice) => {
     const cust = customers.find((c) => c.id === inv.customerId);
     const phone = cust?.phone || "08123456789";
@@ -212,6 +241,16 @@ Mohon melakukan pembayaran sebelum tanggal jatuh tempo melalui QRIS, BCA VA (880
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Smart Billing Automation Settings Button */}
+          <button
+            onClick={() => setIsSmartBillingOpen(true)}
+            id="smart-billing-automation-btn"
+            className="px-3 py-2 text-xs font-bold rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <span>Smart Billing ({smartSettings.cycleType.replace("day_", "Tgl ")})</span>
+          </button>
+
           {/* WhatsApp Gateway Settings Button */}
           <button
             onClick={() => setIsGatewaySettingsOpen(true)}
@@ -221,6 +260,18 @@ Mohon melakukan pembayaran sebelum tanggal jatuh tempo melalui QRIS, BCA VA (880
             <span>WA Gateway</span>
           </button>
 
+          {/* Batch Email e-Invoices Button */}
+          {unpaidInvoices.length > 0 && (
+            <button
+              onClick={handleBatchEmailReminders}
+              disabled={isBatchEmailSending}
+              className="px-3 py-2 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <Mail className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{isBatchEmailSending ? "Mengirim..." : `Kirim Email (${unpaidInvoices.length})`}</span>
+            </button>
+          )}
+
           {/* Batch WhatsApp Reminders Button */}
           {unpaidInvoices.length > 0 && (
             <button
@@ -229,7 +280,7 @@ Mohon melakukan pembayaran sebelum tanggal jatuh tempo melalui QRIS, BCA VA (880
               className="px-3.5 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Kirim Pengingat Masal WA ({unpaidInvoices.length})</span>
+              <span>Kirim WA Masal ({unpaidInvoices.length})</span>
             </button>
           )}
 
@@ -403,6 +454,19 @@ Mohon melakukan pembayaran sebelum tanggal jatuh tempo melalui QRIS, BCA VA (880
                       <td className="p-3.5 text-right space-x-1.5">
                         {inv.status !== "paid" ? (
                           <>
+                            {/* Email e-Invoice Instant Send Button */}
+                            <button
+                              onClick={() => {
+                                setEmailModalInvoice(inv);
+                                setIsEmailModalOpen(true);
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/80 border border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold inline-flex items-center gap-1 transition-all cursor-pointer"
+                              title="Kirim e-Invoice resmi via Email"
+                            >
+                              <Mail className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>Email</span>
+                            </button>
+
                             {/* WhatsApp API Instant Send Button */}
                             <button
                               onClick={() => handleSendReminderViaApi(inv)}
@@ -558,6 +622,39 @@ Mohon melakukan pembayaran sebelum tanggal jatuh tempo melalui QRIS, BCA VA (880
         isOpen={isGatewaySettingsOpen}
         onClose={() => setIsGatewaySettingsOpen(false)}
       />
+
+      {/* Smart Billing Automation Modal */}
+      <SmartBillingAutomationModal
+        isOpen={isSmartBillingOpen}
+        onClose={() => setIsSmartBillingOpen(false)}
+        customers={customers}
+        invoices={invoices}
+        settings={smartSettings}
+        onSaveSettings={(s) => {
+          setSmartSettings(s);
+          showToast(`Pengaturan siklus penagihan ${s.cycleType.replace("day_", "Tgl ")} berhasil disimpan.`);
+        }}
+        onTriggerGenerate={(month, autoSendEmail, autoSendWa) => {
+          onGenerateMonthlyInvoices(month);
+          showToast(`Siklus penagihan ${month} berhasil diproses untuk seluruh pelanggan!`);
+        }}
+      />
+
+      {/* Email e-Invoice Dispatcher Modal */}
+      {emailModalInvoice && (
+        <EmailDispatcherModal
+          isOpen={isEmailModalOpen}
+          onClose={() => {
+            setIsEmailModalOpen(false);
+            setEmailModalInvoice(null);
+          }}
+          invoice={emailModalInvoice}
+          customer={customers.find((c) => c.id === emailModalInvoice.customerId)}
+          onSuccess={(receipt) => {
+            showToast(`e-Invoice ${receipt.invoiceNumber} berhasil dikirim ke ${receipt.recipientEmail}!`);
+          }}
+        />
+      )}
     </div>
   );
 };

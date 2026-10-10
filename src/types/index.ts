@@ -37,6 +37,7 @@ export interface Customer {
   dueDate: number; // Day of month (e.g. 10)
   autoIsolateEnabled: boolean;
   totalPaidCount: number;
+  monthlyFee?: number;
 }
 
 export interface Invoice {
@@ -46,6 +47,7 @@ export interface Invoice {
   customerName: string;
   packageId: string;
   packageName: string;
+  bandwidthSpeed?: string;
   periodMonth: string; // e.g. "September 2026"
   amount: number;
   taxAmount: number; // PPN 11% or 0

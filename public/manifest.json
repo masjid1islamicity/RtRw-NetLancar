@@ -1,0 +1,19 @@
+{
+  "name": "NetLancar & Islamicity Network Portal",
+  "short_name": "NetLancar",
+  "description": "Portal Pelanggan Cerdas & Pembayaran Internet RT/RW Net",
+  "start_url": "/?mode=portal",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "categories": ["utilities", "productivity", "finance"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

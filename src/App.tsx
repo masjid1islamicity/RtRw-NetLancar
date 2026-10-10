@@ -59,6 +59,7 @@ import { BandwidthMonitor } from "./components/bandwidth/BandwidthMonitor";
 import { BillingManagement } from "./components/billing/BillingManagement";
 import { FinanceManagement } from "./components/finance/FinanceManagement";
 import { InventoryManagement } from "./components/inventory/InventoryManagement";
+import { IslamicityCiscoNetworkSystem } from "./components/cisco/IslamicityCiscoNetworkSystem";
 import { OutageNotificationCenter } from "./components/outage/OutageNotificationCenter";
 import { OperationalTasks } from "./components/tasks/OperationalTasks";
 import { AuditReports } from "./components/audit/AuditReports";
@@ -70,6 +71,7 @@ import {
   Activity,
   Wallet as WalletIcon,
   Boxes,
+  Network,
   WifiOff,
   Radio,
   Sparkles,
@@ -663,6 +665,10 @@ export default function App() {
                 />
               )}
 
+              {activeTab === "cisco" && (
+                <IslamicityCiscoNetworkSystem lang={lang} />
+              )}
+
               {activeTab === "outage" && (
                 <OutageNotificationCenter
                   outages={outages}
@@ -761,6 +767,16 @@ export default function App() {
           >
             <Boxes className="w-4 h-4" />
             <span>Aset</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("cisco")}
+            className={`flex flex-col items-center gap-1 ${
+              activeTab === "cisco" ? "text-indigo-600 dark:text-indigo-400" : ""
+            }`}
+          >
+            <Network className="w-4 h-4" />
+            <span>Cisco</span>
           </button>
         </div>
       )}

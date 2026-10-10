@@ -6,6 +6,7 @@ import {
   Receipt,
   Wallet,
   Boxes,
+  Network,
   AlertTriangle,
   CheckSquare,
   FileSpreadsheet,
@@ -74,6 +75,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badgeColor: "bg-amber-500 text-white",
     },
     {
+      id: "cisco",
+      label: t.tabCisco || "Islamicity CISCO Core",
+      icon: Network,
+    },
+    {
       id: "outage",
       label: t.tabOutage,
       icon: AlertTriangle,
@@ -137,34 +143,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Network Edge Device Status Widget */}
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800">
-        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs space-y-2">
+      <div className="p-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+        {/* Cisco Core Status Quick Action */}
+        <button
+          onClick={() => setActiveTab("cisco")}
+          className={`w-full text-left p-2.5 rounded-xl border transition-all text-xs cursor-pointer ${
+            activeTab === "cisco"
+              ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/30"
+              : "bg-blue-50/60 dark:bg-blue-950/30 border-blue-200/70 dark:border-blue-900/50 hover:bg-blue-100/60 dark:hover:bg-blue-900/40"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className={`font-bold text-[11px] flex items-center gap-1.5 ${activeTab === "cisco" ? "text-white" : "text-blue-900 dark:text-blue-300"}`}>
+              <Network className="w-3.5 h-3.5 text-blue-500" />
+              Cisco Catalyst 3850
+            </span>
+            <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Core L3
+            </span>
+          </div>
+          <div className={`flex items-center justify-between text-[10px] ${activeTab === "cisco" ? "text-blue-100" : "text-slate-500 dark:text-slate-400"}`}>
+            <span>Islamicity Backbone</span>
+            <span className="font-mono font-bold">10G SFP+ Up</span>
+          </div>
+        </button>
+
+        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-              <Server className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 text-[11px]">
+              <Server className="w-3 h-3 text-indigo-500" />
               MikroTik CCR1036
             </span>
-            <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="flex items-center gap-1 text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               99.98%
             </span>
           </div>
 
-          <div className="space-y-1 text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="space-y-1 text-[10px] text-slate-500 dark:text-slate-400">
             <div className="flex justify-between">
-              <span>CPU Load</span>
-              <span className="font-mono font-medium text-slate-700 dark:text-slate-300">18%</span>
+              <span>CPU Load: 18%</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400">4 Port PON</span>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 dark:bg-slate-700 h-1 rounded-full overflow-hidden">
               <div className="bg-emerald-500 h-full w-[18%] rounded-full"></div>
             </div>
-
-            <div className="flex justify-between pt-1">
-              <span>GPON OLT Port</span>
-              <span className="font-mono text-emerald-600 dark:text-emerald-400">4 Port Sync</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Active PPPoE</span>
+            <div className="flex justify-between pt-0.5">
+              <span>PPPoE Sesi</span>
               <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
                 {counts.totalCustomers - counts.isolatedCustomers} Sesi
               </span>

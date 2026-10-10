@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Server,
   FileSpreadsheet,
+  Network,
 } from "lucide-react";
 import {
   Customer,
@@ -29,6 +30,7 @@ import { Language, translations } from "../../translations";
 import { MonthlyTrendsBarChart } from "./MonthlyTrendsBarChart";
 import { MonthlyRevenueProjectionLineChart } from "./MonthlyRevenueProjectionLineChart";
 import { NetworkHealthWeatherCard } from "./NetworkHealthWeatherCard";
+import { AiFinancialInsightPanel } from "./AiFinancialInsightPanel";
 
 interface OverviewDashboardProps {
   customers: Customer[];
@@ -237,7 +239,24 @@ Mohon segera melakukan pembayaran via QRIS atau Virtual Account di aplikasi NetL
           <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
           {t.exportExcel}
         </button>
+
+        <button
+          onClick={() => onNavigateTab("cisco")}
+          className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 text-xs font-semibold flex items-center gap-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+        >
+          <Network className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          Islamicity CISCO Core
+        </button>
       </div>
+
+      {/* AI Financial Insight & Expense Optimization Panel (Gemini 3.8 Flash) */}
+      <AiFinancialInsightPanel
+        invoices={invoices}
+        transactions={transactions}
+        wallets={wallets}
+        customers={customers}
+        lang={lang}
+      />
 
       {/* 6-Month Monthly Revenue & Subscriber Growth Bar Chart */}
       <MonthlyTrendsBarChart
